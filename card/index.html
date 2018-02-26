@@ -18,7 +18,13 @@
     var SCREEN_WIDTH = window.innerWidth,
         SCREEN_HEIGHT = window.innerHeight,
         aspect = SCREEN_WIDTH / SCREEN_HEIGHT;
-    var renderer, scene, camera, lights, ground, player, controls;
+    var renderer,
+        scene,
+        camera,
+        lights,
+        ground,
+        player,
+        controls, playerCamera;
 
     //初始化渲染器
     function initRenderer() {
@@ -44,7 +50,7 @@
         camera = new THREE.PerspectiveCamera(45, aspect, 0.1, 40000);
         camera.position.x = 0;
         camera.position.y = 0;
-        camera.position.z = 100;
+        camera.position.z = 1000;
         // camera.up.x = 0;//正方向
         // camera.up.y = 1;
         // camera.up.z = 0;
@@ -53,9 +59,15 @@
         //     y : 0,
         //     z : 0
         // });
-        controls = new THREE.OrbitControls(camera, renderer.domElement);
-        controls.target = new THREE.Vector3(0, 0, 0);
-        //controll.update();
+        playerCamera = new THREE.PerspectiveCamera(20, aspect, 0.1, 400);
+        playerCamera.position.x = 0;
+        playerCamera.position.y -= 125;
+        playerCamera.position.z = 25;
+        playerCamera.up.x = 0;//正方向
+        playerCamera.up.y = 1;
+        playerCamera.up.z = 0;
+        /*controls = new THREE.OrbitControls(playerCamera, renderer.domElement);
+        controls.target = new THREE.Vector3(0, 0, 0);*/
     }
     //创建一个贴图地面板
     function createGround(width, height) {
@@ -75,14 +87,13 @@
         mesh.position.set(0, 0, 0);
         mesh.rotation.x -= 1.5;
         mesh.position.y -= 125;
+        controls = new THREE.OrbitControls(mesh, renderer.domElement);
+        controls.target = new THREE.Vector3(0, 0, 0);
         return mesh;
     }
     //更新渲染
     function render() {
-        //renderer.clear();
-        //camera.rotation = player.rotation;
-        camera.position = player.position;
-        camera.lookAt(player.position);
+        //playerCamera.lookAt(player.position);
         renderer.render(scene, camera);
         requestAnimationFrame(render);
     }
@@ -90,14 +101,16 @@
     function onKeyDown(event){
         var e = event || window.event || arguments.callee.caller.arguments[0];
         if(e && e.keyCode == 38){//up
-            player.rotation.z -= 5;
+            player.rotation.z -= 90;
+            playerCamera.rotation.y -= 90;
         } else if(e && e.keyCode == 40){//down
-            player.rotation.z += 5;
-        } else if(e && e.keyCode == 37){//left
+            player.rotation.z += 90;
+            playerCamera.rotation.y += 90;
+        }/* else if(e && e.keyCode == 37){//left
             player.rotation.z -= 90;
         } else if (e && e.keyCode == 39){//right
             player.rotation.z += 90;
-        }
+        }*/
     }
     //自适应
     function onWindowResize() {
@@ -122,6 +135,9 @@
         initCamera();
         initScene();
         initLight();
+        scene.add(playerCamera);
+        var helper = new THREE.CameraHelper( playerCamera );
+        scene.add( helper );
         scene.add(lights);
         createGround(500, 500);
         scene.add(ground);
