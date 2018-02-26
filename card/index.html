@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;overflow: hidden;
+        }
+    </style>
+</head>
+<body>
+<canvas id="canvas1"></canvas>
+<script src="../build/three.js"></script>
+<script src="../examples/js/controls/OrbitControls.js"></script>
+<script>
+    var SCREEN_WIDTH = window.innerWidth,
+        SCREEN_HEIGHT = window.innerHeight,
+        aspect = SCREEN_WIDTH / SCREEN_HEIGHT;
+    var renderer, scene, camera, lights, ground, player, controls;
+
+    //初始化渲染器
+    function initRenderer() {
+        renderer = new THREE.WebGLRenderer({canvas: document.getElementById("canvas1"), antialias: true});
+        renderer.setClearColor(0x000000);
+        renderer.setPixelRatio(window.devicePixelRatio);
+        renderer.setSize(window.innerWidth, window.innerHeight);
+    }
+    //初始化场景
+    function initScene() {
+        scene = new THREE.Scene();
+    }
+    //初始化灯光
+    function initLight() {
+        lights = new THREE.Group();
+        var light = new THREE.AmbientLight(0xffffff, 0.5);
+        lights.add(light);
+        var light1 = new THREE.PointLight(0xffffff, 0.5);
+        lights.add(light1);
+    }
+    //初始化摄像机
+    function initCamera() {
+        camera = new THREE.PerspectiveCamera(45, aspect, 0.1, 40000);
+        camera.position.x = 0;
+        camera.position.y = 0;
+        camera.position.z = 1000;
+        // camera.up.x = 0;//正方向
+        // camera.up.y = 1;
+        // camera.up.z = 0;
+        // camera.lookAt({
+        //     x : 0,
+        //     y : 0,
+        //     z : 0
+        // });
+        controls = new THREE.OrbitControls(camera, renderer.domElement);
+        controls.target = new THREE.Vector3(0, 0, 0);
+        //controll.update();
+    }
+    //创建一个贴图地面板
+    function createGround(x, y) {
+        var geometry = new THREE.PlaneGeometry(500, 500),
+            material = new THREE.MeshLambertMaterial({color: 0xf3ffe2, map: new THREE.TextureLoader().load("../examples/textures/crate.gif")});
+        ground = new THREE.Mesh(geometry, material);
+        ground.position.set(0, 0, 0);
+        ground.rotation.x -= 1.5;
+        ground.position.y -= 150;
+        return ground;
+    }
+    //创建角色
+    function createPlayer() {
+        var geometry = new THREE.CubeGeometry(50, 50, 50),
+            material = new THREE.MeshLambertMaterial({color: 0xf3ffe2, map: new THREE.TextureLoader().load("../examples/textures/crate.gif")}),
+            mesh = new THREE.Mesh(geometry, material);
+        mesh.position.set(0, 0, 0);
+        mesh.rotation.x -= 1.5;
+        mesh.position.y -= 125;
+        return mesh;
+    }
+    //更新渲染
+    function render() {
+        renderer.clear();
+        renderer.render(scene, camera);
+        requestAnimationFrame(render);
+    }
+    //键盘按下事件
+    function onKeyDown(event){
+        var e = event || window.event || arguments.callee.caller.arguments[0];
+        if(e && e.keyCode == 38){//up
+            player.rotation.z -= 5;
+        } else if(e && e.keyCode == 40){//down
+            player.rotation.z += 5;
+        } else if(e && e.keyCode == 37){//left
+            player.rotation.z -= 90;
+        } else if (e && e.keyCode == 39){//right
+            player.rotation.z += 90;
+        }
+    }
+    //自适应
+    function onWindowResize() {
+        camera.aspect = window.innerWidth / window.innerHeight;
+        camera.updateProjectionMatrix();
+    }
+    
+    function startPlayer() {
+        
+    }
+    
+    function stopPlayer() {
+        
+    }
+    
+    function movePlayer() {
+        
+    }
+    //初始化引擎
+    function initThreejs() {
+        initRenderer();
+        initCamera();
+        initScene();
+        initLight();
+        scene.add(lights);
+        createGround();
+        scene.add(ground);
+        player = createPlayer();
+        scene.add(player);
+        camera.position = player.position;
+        document.onkeydown = onKeyDown;
+        window.addEventListener( 'resize', onWindowResize, false );
+        requestAnimationFrame(render);
+        // //监听鼠标事件
+        renderer.domElement.addEventListener('mousedown', startPlayer, false);
+        renderer.domElement.addEventListener('mousemove', movePlayer, false );
+        renderer.domElement.addEventListener('mouseup', stopPlayer,false);
+        //监听触摸事件
+        renderer.domElement.addEventListener('touchstart', startPlayer, false);
+        renderer.domElement.addEventListener('touchmove', movePlayer, false);
+        renderer.domElement.addEventListener('touchend', stopPlayer, false);
+    }
+    initThreejs();
+</script>
+</body>
+</html>
